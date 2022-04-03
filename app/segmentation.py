@@ -26,16 +26,22 @@ device = torch.device("cuda", 0) if torch.cuda.is_available() else torch.device(
 model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True).to(device).eval()
 
 
-def get_labels_from_picture(model: 'torchvision.models', img):
-    labels = (model(img)[0]['labels'])
-    if len(labels) == 0:
-        return '__background__'
+def get_labels_from_picture(model: 'torchvision.models', img, detection_score=0.75):
+    prediction = model(img)[0]
+    labels = []
 
-    return [COCO_INSTANCE_CATEGORY_NAMES[i] for i in labels]
+    for label, score in zip(prediction['labels'], prediction['scores']):
+        if score >= detection_score:
+            labels.append(label)
+
+    if len(labels) == 0:
+        return ['__background__']
+
+    return labels
 
 
 def transform(img_data):
-    image = Image.open(io.BytesIO(img_data))
+    # image = Image.open(io.BytesIO(img_data))
     # image_mean = [0.485, 0.456, 0.406]
     # image_std = [0.229, 0.224, 0.225]
     # min_size = 800
@@ -60,7 +66,7 @@ __all__ = [get_labels_from_picture, transform]
 #         # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 #     ])
 #
-#     image = Image.open("img/milk_vase_book_clock.jpg")
+#     image = Image.open("../img/milk_vase_book_clock.jpg")
 #     img_data = transform(image)
 #
-#     print(set(COCO_INSTANCE_CATEGORY_NAMES[(model(img_data)[0]['labels'])]))
+#     print(model(img_data)[0]['labels'])
