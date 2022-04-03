@@ -36,7 +36,7 @@ async def predict_endpoint(req: ImageRequest):
 
 
     labels = segmentation.get_labels_from_picture(model, image_data)
-    labels = [labels] if isinstance(labels, list) else labels
+    labels = [labels] if not isinstance(labels, list) else labels
 
     logging.info(f'find next objects {labels}')
     return LabelResponse(objects=labels)
