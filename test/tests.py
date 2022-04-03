@@ -20,7 +20,7 @@ def eval_data():
 
 @pytest.fixture(scope='session')
 def server_ip():
-    server_ip_value = os.environ['DOCKER_IP']
+    server_ip_value = 'localhost'
     if server_ip_value is None:
         pytest.fail("No cluster ip were provided")
     return server_ip_value

@@ -27,7 +27,8 @@ model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True).to(d
 
 
 def get_labels_from_picture(model: 'torchvision.models', img):
-    return set(COCO_INSTANCE_CATEGORY_NAMES[(model(img)[0]['labels'])])
+    labels = COCO_INSTANCE_CATEGORY_NAMES[(model(img)[0]['labels'])]
+    return labels if len(labels) == 1 else set(labels)
 
 
 def transform(img_data):
