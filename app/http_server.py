@@ -1,44 +1,45 @@
-import asyncio
-import concurrent.futures
-import aiohttp
 from fastapi import FastAPI
 from pydantic import BaseModel
 import logging
-import segmentation
 import sys
 import uvicorn
-import os
-
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
-model = segmentation.model
-
+import grpc
+import inference_pb2_grpc
+import inference_pb2
 
 class ImageRequest(BaseModel):
     url: str
 
 
-class LabelResponse(BaseModel):
+class ObjectResponse(BaseModel):
     objects: list[str]
 
 
 app = FastAPI()
 
 
-@app.post("/predict", response_model=LabelResponse)
+@app.post("/predict", response_model=ObjectResponse)
 async def predict_endpoint(req: ImageRequest):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(req.url) as resp:
-            data = await resp.read()
-            loop = asyncio.get_event_loop()
-            image_data = await loop.run_in_executor(executor, segmentation.transform, data)
 
-    labels = segmentation.get_labels_from_picture(model, image_data)
+    logging.info(f'comming url is {type(req.url)}')
 
-    logging.info(f'find next objects {labels}')
-    return LabelResponse(objects=labels)
+    async with grpc.aio.insecure_channel('0.0.0.0:9090') as channel:
+        service = inference_pb2_grpc.InstanceDetectorStub(channel)
+        r = await service.Predict(inference_pb2.InstanceDetectorInput(
+            url=req.url,
+        ))
+
+    # logging.info(f"want to answer with {r.objects}")
+
+    response_img_objects = r.objects
+    # logging.info(f"type is {response_img_objects}")
+    # logging.info(f"type is {type(list(response_img_objects))}")
+
+    return ObjectResponse(objects=list(r.objects))
 
 
 if __name__ == '__main__':
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    print("http start serving ...")
     uvicorn.run("http_server:app", port=8080, host='0.0.0.0')
+    # uvicorn.run("http_server:app", port=9999, host='localhost') # local run
