@@ -41,7 +41,7 @@ def get_labels_from_picture(model: 'torchvision.models', img, detection_score=0.
 
 
 def transform(img_data):
-    # image = Image.open(io.BytesIO(img_data))
+    image = Image.open(io.BytesIO(img_data))
     # image_mean = [0.485, 0.456, 0.406]
     # image_std = [0.229, 0.224, 0.225]
     # min_size = 800
