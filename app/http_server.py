@@ -34,7 +34,6 @@ async def predict_endpoint(req: ImageRequest):
             loop = asyncio.get_event_loop()
             image_data = await loop.run_in_executor(executor, segmentation.transform, data)
 
-
     labels = segmentation.get_labels_from_picture(model, image_data)
     labels = [labels] if not isinstance(labels, list) else labels
 
