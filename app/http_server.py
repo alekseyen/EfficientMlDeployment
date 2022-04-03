@@ -40,5 +40,4 @@ async def predict_endpoint(req: ImageRequest):
 
 
 if __name__ == '__main__':
-    # os.environ['DOCKER_IP'] = "localhost"  # todo: remove, just for debugging
-    uvicorn.run("http_server:app", port=8080, host=os.environ['DOCKER_IP'])  # todo: поменять, иначе не соберётся
+    uvicorn.run("http_server:app", port=8080, host='0.0.0.0')
