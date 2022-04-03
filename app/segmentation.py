@@ -1,13 +1,13 @@
 import io
 
 import torchvision
-import numpy as np
 import torch
 from PIL import Image
 import torchvision.transforms as transforms
+
 # from torchvision.models.detection.transform import GeneralizedRCNNTransform
 
-COCO_INSTANCE_CATEGORY_NAMES = np.array([
+COCO_INSTANCE_CATEGORY_NAMES = ([
     '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
     'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
     'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
@@ -27,8 +27,11 @@ model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True).to(d
 
 
 def get_labels_from_picture(model: 'torchvision.models', img):
-    labels = COCO_INSTANCE_CATEGORY_NAMES[(model(img)[0]['labels'])]
-    return labels if len(labels) == 1 else set(labels)
+    labels = (model(img)[0]['labels'])
+    if len(labels) == 0:
+        return '__background__'
+
+    return [COCO_INSTANCE_CATEGORY_NAMES[i] for i in labels]
 
 
 def transform(img_data):
@@ -39,7 +42,7 @@ def transform(img_data):
     # max_size = 1333
     # return GeneralizedRCNNTransform(min_size, max_size, image_mean, image_std)(img)
 
-    return transforms.Compose([transforms.ToTensor(),])(image).unsqueeze(0)
+    return transforms.Compose([transforms.ToTensor(), ])(image).unsqueeze(0)
 
 
 __all__ = [get_labels_from_picture, transform]
