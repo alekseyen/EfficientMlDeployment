@@ -34,7 +34,9 @@ async def predict_endpoint(req: ImageRequest):
             loop = asyncio.get_event_loop()
             image_data = await loop.run_in_executor(executor, segmentation.transform, data)
 
-    labels = list(segmentation.get_labels_from_picture(model, image_data))
+
+    labels = [segmentation.get_labels_from_picture(model, image_data)]
+
     logging.info(f'find next objects {labels}')
     return LabelResponse(objects=labels)
 

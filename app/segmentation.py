@@ -31,8 +31,7 @@ def get_labels_from_picture(model: 'torchvision.models', img):
     if len(labels) == 0:
         return '__background__'
 
-    return '__background__'
-    # return [COCO_INSTANCE_CATEGORY_NAMES[i] for i in labels]
+    return [COCO_INSTANCE_CATEGORY_NAMES[i] for i in labels]
 
 
 def transform(img_data):
