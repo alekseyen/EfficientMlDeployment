@@ -23,21 +23,21 @@ COCO_INSTANCE_CATEGORY_NAMES = ([
 ])
 
 device = torch.device("cuda", 0) if torch.cuda.is_available() else torch.device("cpu")
-model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True).to(device).eval()
+model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True, progress=False).to(device).eval()
 
 
 def get_labels_from_picture(model: 'torchvision.models', img, detection_score=0.75):
     prediction = model(img)[0]
-    labels = []
+    objects = []
 
     for label, score in zip(prediction['labels'], prediction['scores']):
         if score >= detection_score:
-            labels.append(label)
+            objects.append(COCO_INSTANCE_CATEGORY_NAMES[label])
 
-    if len(labels) == 0:
+    if len(objects) == 0:
         return ['__background__']
 
-    return labels
+    return objects
 
 
 def transform(img_data):
