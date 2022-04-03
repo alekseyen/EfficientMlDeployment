@@ -41,4 +41,11 @@ async def predict_endpoint(req: ImageRequest):
 
 if __name__ == '__main__':
     os.environ['DOCKER_IP'] = "localhost"  # todo: remove, just for debugging
+    import json
+
+    with open('eval.json', 'r') as f:
+        ttt = json.loads(f.read())
+        for i in ttt:
+            print(i, end='\t')
+
     uvicorn.run("http_server:app", port=8080, host=os.environ['DOCKER_IP'])  # todo: поменять, иначе не соберётся
