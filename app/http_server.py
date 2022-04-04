@@ -22,7 +22,7 @@ class ObjectResponse(BaseModel):
     objects: list[str]
 
 
-os.environ["PROMETHEUS_MULTIPROC_DIR"] = 'app/metrics'
+os.environ["PROMETHEUS_MULTIPROC_DIR"] = 'metrics'
 app = FastAPI()
 registry = CollectorRegistry()
 
