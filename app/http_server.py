@@ -8,7 +8,6 @@ import inference_pb2_grpc
 import inference_pb2
 import os
 from prometheus_client import multiprocess
-import prometheus_client as prom
 from prometheus_client import generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST, Counter
 from starlette.requests import Request
 from starlette.responses import Response
