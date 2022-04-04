@@ -1,9 +1,9 @@
 FROM python:3.9
 
 RUN apt-get -y update && apt-get -y  upgrade && apt-get -y install supervisor
-#RUN pip install supervisor-stdout
 
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt

@@ -6,6 +6,13 @@ import uvicorn
 import grpc
 import inference_pb2_grpc
 import inference_pb2
+import os
+from prometheus_client import multiprocess
+import prometheus_client as prom
+from prometheus_client import generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST, Counter
+from starlette.requests import Request
+from starlette.responses import Response
+
 
 class ImageRequest(BaseModel):
     url: str
@@ -15,13 +22,18 @@ class ObjectResponse(BaseModel):
     objects: list[str]
 
 
+os.environ["PROMETHEUS_MULTIPROC_DIR"] = 'app/metrics'
 app = FastAPI()
+registry = CollectorRegistry()
+
+MY_COUNTER = Counter('app_http_inference_count', 'The number of http endpoint invocations.', registry=registry)
 
 
 @app.post("/predict", response_model=ObjectResponse)
 async def predict_endpoint(req: ImageRequest):
+    logging.info(f'coming url is {req.url}')
 
-    logging.info(f'comming url is {type(req.url)}')
+    MY_COUNTER.inc()
 
     async with grpc.aio.insecure_channel('0.0.0.0:9090') as channel:
         service = inference_pb2_grpc.InstanceDetectorStub(channel)
@@ -29,17 +41,20 @@ async def predict_endpoint(req: ImageRequest):
             url=req.url,
         ))
 
-    # logging.info(f"want to answer with {r.objects}")
-
-    response_img_objects = r.objects
-    # logging.info(f"type is {response_img_objects}")
-    # logging.info(f"type is {type(list(response_img_objects))}")
-
     return ObjectResponse(objects=list(r.objects))
+
+
+@app.get('/metrics')
+def metrics(request: Request):
+    multiprocess.MultiProcessCollector(registry)
+    data = generate_latest(registry)
+    logging.debug(data)
+
+    return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == '__main__':
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
     print("http start serving ...")
     uvicorn.run("http_server:app", port=8080, host='0.0.0.0')
-    # uvicorn.run("http_server:app", port=9999, host='localhost') # local run
